@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🖖 Admirálský Archiv V5 – Claude.ai Export Viewer</title>
+  <link rel="stylesheet" href="style.css">  
+</head>
+<body>
+    <div class="header">
+  <div>
+    <div class="header-title">🖖 ADMIRÁLSKÝ ARCHIV</div>
+    <div class="header-sub">CLAUDE.AI · EXPORT VIEWER V4 · FULL STRUCTURE PARSER · FLOTILA VÍCE ADMIRÁLA JIŘÍKU</div>
+  </div>
+  <div class="v4-badge">✅ V5.3 – JEDNOTNÉ BARVY</div>
+</div>
+
+<div class="upload-zone" id="uploadZone">
+  <div class="upload-box"
+       onclick="document.getElementById('fileInput').click()"
+       ondragover="e=>{e.preventDefault();e.stopPropagation();}"
+       ondrop="handleDrop(event)">
+    <span class="upload-icon">🚀</span>
+    <div class="upload-title">NAČÍST EXPORT CLAUDE.AI</div>
+    <div class="upload-desc">
+      Klikni nebo přetáhni JSON soubor z Claude.ai exportu<br>
+      <span style="color:var(--green);font-size:.8rem;">✅ V5 – Čte VŠE: text, kódy, artifacty, tool_use, display_content, citace, summary, timestamps · 100% lokálně</span>
+    </div>
+    <input type="file" id="fileInput" accept=".json">
+  </div>
+</div>
+
+<div class="loading" id="loading">
+  <div class="loading-ring"></div>
+  <div class="loading-text">NAČÍTÁM ARCHIV FLOTILY...</div>
+</div>
+
+<div class="stats-bar" id="statsBar">
+  <div class="stat-card"><div class="stat-number" id="sTotal">0</div><div class="stat-label">Konverzací</div></div>
+  <div class="stat-card"><div class="stat-number" id="sMessages">0</div><div class="stat-label">Zpráv</div></div>
+  <div class="stat-card green"><div class="stat-number" id="sArtifacts">0</div><div class="stat-label">💻 Artifactů</div></div>
+  <div class="stat-card pink"><div class="stat-number" id="sTools">0</div><div class="stat-label">🔧 Tool Calls</div></div>
+  <div class="stat-card gold"><div class="stat-number" id="sFirst">–</div><div class="stat-label">🏆 První mise</div></div>
+  <div class="stat-card"><div class="stat-number" id="sLast">–</div><div class="stat-label">Poslední mise</div></div>
+</div>
+
+<div class="debug-panel" id="debugPanel">
+  <div class="debug-box" id="debugBox">🔧 Debug info se zobrazí po načtení souboru.</div>
+</div>
+
+<div class="controls" id="controls">
+  <input type="text" class="search-box" id="searchInput" placeholder="🔍 Hledat v textu, kódech, tool calls..." oninput="filterConvs()">
+  <button class="ctrl-btn active" id="btnOld" onclick="sortBy('oldest')">⬆ Nejstarší</button>
+  <button class="ctrl-btn" id="btnNew" onclick="sortBy('newest')">⬇ Nejnovější</button>
+  <button class="ctrl-btn" onclick="toggleDebug()">🔧 Debug</button>
+  <div class="result-count" id="rCount"></div>
+</div>
+
+<div class="conversations" id="convsContainer">
+  <div class="section-title">ARCHIV MISÍ FLOTILY</div>
+  <div id="convList"></div>
+  <div class="no-results" id="noResults">🔍 Žádné výsledky</div>
+</div>
+ <script  src="script.js"></script>   
+<script src="diacritic-fix.js"></script>
+</body>
+</html>
