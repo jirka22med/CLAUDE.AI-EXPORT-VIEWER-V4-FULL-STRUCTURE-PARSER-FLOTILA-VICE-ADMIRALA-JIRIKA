@@ -173,9 +173,20 @@ function parseContentItem(c, blocks) {
     return;
   }
 
-  // IMAGE – obrázek (jen info)
+  // IMAGE – obrázek s podporou base64 i URL
   if (type === 'image') {
-    blocks.push({ type:'text', content:`[🖼️ Obrázek${c.source?.url ? ': '+c.source.url : ''}]` });
+    const src = c.source || {};
+    let imgSrc = '';
+    let mediaType = 'image/jpeg';
+    if (src.type === 'base64' && src.data) {
+      mediaType = src.media_type || 'image/jpeg';
+      imgSrc = `data:${mediaType};base64,${src.data}`;
+    } else if (src.url) {
+      imgSrc = src.url;
+    } else if (src.type === 'url' && src.url) {
+      imgSrc = src.url;
+    }
+    blocks.push({ type:'image', src:imgSrc, name:c.name||c.title||'obrázek', mediaType });
     return;
   }
 
@@ -294,6 +305,9 @@ function renderStats() {
 
 // ── RENDER CONVS ──────────────────────────────────────────
 function renderConvs(filter='') {
+  // Reset registru obrázků před každým novým renderem
+  if (window.ImageModal) window.ImageModal.reset();
+
   const list = document.getElementById('convList');
   const noR = document.getElementById('noResults');
   const lf = filter.toLowerCase();
@@ -373,6 +387,11 @@ function renderAttachBlock(a) {
   const lang = detectLang(name);
   const ftype = a.file_type || '';
 
+  // ── OBRÁZKY: detekuj před extracted_content ──────────────────
+  if (window.ImageModal && window.ImageModal.isImageFile(name)) {
+    return window.ImageModal.renderImageThumbFromAttach(a);
+  }
+
   if (a.extracted_content) {
     const id = 'att_' + rndId();
     return '<div class="block-attach-code">' +
@@ -384,9 +403,12 @@ function renderAttachBlock(a) {
           (ftype ? '<span class="attach-ftype">' + esc(ftype) + '</span>' : '') +
           '<span class="attach-lang">' + lang.toUpperCase() + '</span>' +
         '</div>' +
-        '<button class="copy-btn" onclick="copyEl(\'' + id + '\')">\u{1F4CB} Kop\u00EDrovat</button>' +
+        '<div class="block-header-actions">' +
+          '<button class="collapse-btn" onclick="toggleCollapse(this)">\u25BC Rozbalit</button>' +
+          '<button class="copy-btn" onclick="copyEl(\'' + id + '\')">\u{1F4CB} Kop\u00EDrovat</button>' +
+        '</div>' +
       '</div>' +
-      '<div class="block-attach-body"><pre id="' + id + '">' + esc(a.extracted_content) + '</pre></div>' +
+      '<div class="block-attach-body code-collapsed"><pre id="' + id + '">' + esc(a.extracted_content) + '</pre></div>' +
     '</div>';
   } else {
     const av = a._sender === 'human' ? '\u{1F464}' : '\u{1F596}';
@@ -433,15 +455,26 @@ function renderBlock(b) {
     return `<div class="block-text">${escHtml(b.content)}</div>`;
   }
 
+  if (b.type==='image') {
+    if (window.ImageModal) {
+      const idx = window.ImageModal.registerImage(b.src, b.name, '', b.mediaType||'image/jpeg');
+      return window.ImageModal.renderThumb(idx);
+    }
+    return `<div class="block-text">[🖼️ ${esc(b.name||'Obrázek')}]</div>`;
+  }
+
   if (b.type==='code') {
     const id='c'+rndId();
     return `
       <div class="block-code">
         <div class="block-code-header">
           <div><span class="code-lang">💻 ${esc(b.lang||'text')}</span>${b.filename?` <span class="code-fname">${esc(b.filename)}</span>`:''}</div>
-          <button class="copy-btn" onclick="copyEl('${id}')">📋 Kopírovat</button>
+          <div class="block-header-actions">
+            <button class="collapse-btn" onclick="toggleCollapse(this)">▼ Rozbalit</button>
+            <button class="copy-btn" onclick="copyEl('${id}')">📋 Kopírovat</button>
+          </div>
         </div>
-        <div class="block-code-body"><pre id="${id}">${esc(b.content)}</pre></div>
+        <div class="block-code-body code-collapsed"><pre id="${id}">${esc(b.content)}</pre></div>
       </div>`;
   }
 
@@ -452,9 +485,12 @@ function renderBlock(b) {
       <div class="block-artifact">
         <div class="block-artifact-header">
           <div><span class="art-title">📄 ${esc(b.title||'Artifact')}</span>${tl?` <span class="art-type">· ${esc(tl)}</span>`:''}</div>
-          <button class="art-copy" onclick="copyEl('${id}')">📋 Kopírovat</button>
+          <div class="block-header-actions">
+            <button class="collapse-btn collapse-btn-art" onclick="toggleCollapse(this)">▼ Rozbalit</button>
+            <button class="art-copy" onclick="copyEl('${id}')">📋 Kopírovat</button>
+          </div>
         </div>
-        <div class="block-artifact-body"><pre id="${id}">${esc(b.content)}</pre></div>
+        <div class="block-artifact-body code-collapsed"><pre id="${id}">${esc(b.content)}</pre></div>
       </div>`;
   }
 
@@ -464,9 +500,12 @@ function renderBlock(b) {
       <div class="block-tool">
         <div class="block-tool-header">
           <span class="tool-name">🔧 TOOL: ${esc(b.name)}</span>${b.timestamp ? `<span style="font-family:'Fira Code',monospace;font-size:.6rem;color:rgba(255,47,255,.6)">${esc(b.timestamp)}</span>` : ''}
-          <button class="tool-copy" onclick="copyEl('${id}')">📋 Kopírovat</button>
+          <div class="block-header-actions">
+            <button class="collapse-btn collapse-btn-tool" onclick="toggleCollapse(this)">▼ Rozbalit</button>
+            <button class="tool-copy" onclick="copyEl('${id}')">📋 Kopírovat</button>
+          </div>
         </div>
-        <div class="block-tool-body"><pre id="${id}">${esc(b.content)}</pre></div>
+        <div class="block-tool-body code-collapsed"><pre id="${id}">${esc(b.content)}</pre></div>
       </div>`;
   }
 
@@ -476,8 +515,9 @@ function renderBlock(b) {
       <div class="block-result">
         <div class="block-result-header">
           <span class="result-label">${b.isError?'❌ TOOL ERROR':'✅ VÝSLEDEK NÁSTROJE'}</span>
+          <button class="collapse-btn collapse-btn-result" onclick="toggleCollapse(this)">▼ Rozbalit</button>
         </div>
-        <div class="block-result-body"><pre id="${id}">${esc(b.content)}</pre></div>
+        <div class="block-result-body code-collapsed"><pre id="${id}">${esc(b.content)}</pre></div>
       </div>`;
   }
 
@@ -508,9 +548,12 @@ function renderBlock(b) {
       <div class="block-display">
         <div class="block-display-header">
           <span class="disp-type">🟡 ${esc(b.lang||b.displayType||'display')}</span>
-          <button class="disp-copy" onclick="copyEl('${id}')">📋 Kopírovat</button>
+          <div class="block-header-actions">
+            <button class="collapse-btn collapse-btn-disp" onclick="toggleCollapse(this)">▼ Rozbalit</button>
+            <button class="disp-copy" onclick="copyEl('${id}')">📋 Kopírovat</button>
+          </div>
         </div>
-        <div class="block-display-body"><pre id="${id}">${esc(b.content)}</pre></div>
+        <div class="block-display-body code-collapsed"><pre id="${id}">${esc(b.content)}</pre></div>
       </div>`;
   }
 
@@ -519,6 +562,20 @@ function renderBlock(b) {
 
 // ── HELPERS ───────────────────────────────────────────────
 function rndId() { return Math.random().toString(36).substr(2,9); }
+
+// ── TOGGLE COLLAPSE – rozbalit/sbalit kódové bloky ────────────
+function toggleCollapse(btn) {
+  const block = btn.closest(
+    '.block-code,.block-artifact,.block-tool,.block-result,.block-display,.block-attach-code'
+  );
+  if (!block) return;
+  const body = block.querySelector(
+    '.block-code-body,.block-artifact-body,.block-tool-body,.block-result-body,.block-display-body,.block-attach-body'
+  );
+  if (!body) return;
+  const isNowCollapsed = body.classList.toggle('code-collapsed');
+  btn.textContent = isNowCollapsed ? '▼ Rozbalit' : '▲ Sbalit';
+}
 function copyEl(id) {
   const el=document.getElementById(id);
   if(!el) return;
