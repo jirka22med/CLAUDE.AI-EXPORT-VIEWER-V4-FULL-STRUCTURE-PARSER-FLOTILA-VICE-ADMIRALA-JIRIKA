@@ -269,6 +269,355 @@
   @media(max-width:1000px){.stats-bar.visible{grid-template-columns:repeat(3,1fr);} .conv-date{display:none;}}
   @media(max-width:600px){.stats-bar.visible{grid-template-columns:repeat(2,1fr);}}
 
+  /* ════════════════════════════════════════════════════════════
+     COLLAPSE / ROZBALIT – kódové bloky
+     ════════════════════════════════════════════════════════════ */
+  .code-collapsed { display: none !important; }
+
+  .block-header-actions { display:flex; gap:5px; align-items:center; flex-shrink:0; }
+
+  .collapse-btn {
+    background:transparent;
+    border:1px solid rgba(0,212,255,.3);
+    color:var(--accent);
+    border-radius:5px;
+    padding:3px 9px;
+    font-size:.6rem;
+    cursor:pointer;
+    font-family:'Exo 2',sans-serif;
+    transition:all .2s;
+    letter-spacing:.5px;
+    white-space:nowrap;
+  }
+  .collapse-btn:hover { background:rgba(0,212,255,.15); }
+
+  .collapse-btn-art  { border-color:rgba(123,47,255,.4); color:var(--accent2); }
+  .collapse-btn-art:hover { background:rgba(123,47,255,.18); }
+
+  .collapse-btn-tool { border-color:rgba(255,47,255,.35); color:var(--pink); }
+  .collapse-btn-tool:hover { background:rgba(255,47,255,.14); }
+
+  .collapse-btn-result { border-color:rgba(0,255,136,.3); color:var(--green); }
+  .collapse-btn-result:hover { background:rgba(0,255,136,.1); }
+
+  .collapse-btn-disp { border-color:rgba(255,215,0,.3); color:var(--gold); }
+  .collapse-btn-disp:hover { background:rgba(255,215,0,.12); }
+
+  /* block-result-header potřebuje flex justify-content:space-between */
+  .block-result-header { display:flex; align-items:center; justify-content:space-between; padding:6px 14px; }
+
+  /* ════════════════════════════════════════════════════════════
+     OBRÁZKY – thumbnail 240 × 340 px
+     ════════════════════════════════════════════════════════════ */
+  .img-thumb-wrap {
+    display:inline-flex;
+    flex-direction:column;
+    width:240px;
+    border:1px solid rgba(0,212,255,.3);
+    border-radius:10px;
+    overflow:hidden;
+    margin:6px 8px 6px 0;
+    background:var(--bg2);
+    transition:all .25s;
+    cursor:pointer;
+    vertical-align:top;
+  }
+  .img-thumb-wrap:hover {
+    border-color:var(--accent);
+    box-shadow:var(--glow);
+    transform:translateY(-2px);
+  }
+  .img-thumb-nodata-wrap { cursor:default; }
+  .img-thumb-nodata-wrap:hover { transform:none; box-shadow:none; border-color:rgba(0,212,255,.3); }
+
+  .img-thumb-inner {
+    position:relative;
+    width:240px;
+    height:340px;
+    overflow:hidden;
+    background:#010a15;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .img-thumb-img {
+    width:70%;
+    height:70%;
+    object-fit:contain;
+    display:block;
+    transition:transform .3s;
+  }
+  .img-thumb-wrap:hover .img-thumb-img { transform:scale(1.03); }
+
+  .img-thumb-overlay {
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,.45);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    opacity:0;
+    transition:opacity .2s;
+  }
+  .img-thumb-wrap:hover .img-thumb-overlay { opacity:1; }
+  .img-thumb-zoom {
+    background:rgba(0,212,255,.2);
+    border:1px solid var(--accent);
+    color:var(--accent);
+    padding:7px 16px;
+    border-radius:20px;
+    font-family:'Orbitron',monospace;
+    font-size:.65rem;
+    letter-spacing:1px;
+  }
+
+  .img-thumb-err {
+    color:rgba(255,100,100,.7);
+    font-size:.75rem;
+    text-align:center;
+    padding:10px;
+    font-family:'Fira Code',monospace;
+  }
+
+  .img-thumb-footer {
+    padding:6px 10px;
+    background:rgba(0,212,255,.06);
+    border-top:1px solid rgba(0,212,255,.15);
+    display:flex;
+    align-items:center;
+    gap:5px;
+    flex-wrap:wrap;
+  }
+  .img-thumb-who {
+    font-family:'Orbitron',monospace;
+    font-size:.48rem;
+    color:var(--accent);
+    letter-spacing:1px;
+    flex-shrink:0;
+  }
+  .img-thumb-name {
+    flex:1;
+    font-family:'Fira Code',monospace;
+    font-size:.65rem;
+    color:var(--text2);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .img-thumb-idx {
+    font-family:'Orbitron',monospace;
+    font-size:.5rem;
+    color:rgba(0,212,255,.55);
+    white-space:nowrap;
+    flex-shrink:0;
+  }
+
+  .img-thumb-nodata {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    width:240px;
+    height:340px;
+    background:#010a15;
+  }
+  .img-nodata-icon { font-size:2.5rem; }
+  .img-nodata-name {
+    font-family:'Fira Code',monospace;
+    font-size:.7rem;
+    color:var(--text2);
+    text-align:center;
+    padding:0 12px;
+    word-break:break-all;
+  }
+  .img-nodata-msg {
+    font-size:.62rem;
+    color:rgba(0,212,255,.4);
+    font-family:'Orbitron',monospace;
+    letter-spacing:.5px;
+    text-align:center;
+    padding:0 10px;
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     MODÁLNÍ OKNO – lightbox s indexovou kalibrací
+     ════════════════════════════════════════════════════════════ */
+  .img-modal-overlay {
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.88);
+    z-index:9999;
+    align-items:center;
+    justify-content:center;
+    backdrop-filter:blur(6px);
+    animation:fadeIn .15s ease;
+  }
+  .img-modal-overlay.active { display:flex; }
+
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+  .img-modal-box {
+    background:linear-gradient(135deg,var(--bg2),var(--bg3));
+    border:1px solid rgba(0,212,255,.4);
+    border-radius:14px;
+    box-shadow:0 0 60px rgba(0,212,255,.25), 0 0 120px rgba(0,0,0,.8);
+    display:flex;
+    flex-direction:column;
+    max-width:min(90vw, 1100px);
+    max-height:90vh;
+    overflow:hidden;
+    animation:modalIn .2s ease;
+  }
+  @keyframes modalIn { from{transform:scale(.95);opacity:0} to{transform:scale(1);opacity:1} }
+
+  /* Header modalu */
+  .img-modal-header {
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:12px 18px;
+    background:rgba(0,212,255,.08);
+    border-bottom:1px solid rgba(0,212,255,.2);
+    flex-shrink:0;
+  }
+  .img-modal-title-wrap { display:flex; align-items:center; gap:8px; flex:1; min-width:0; }
+  .img-modal-icon { font-size:1.1rem; flex-shrink:0; }
+  .img-modal-name {
+    font-family:'Fira Code',monospace;
+    font-size:.82rem;
+    color:var(--text);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .img-modal-counter {
+    font-family:'Orbitron',monospace;
+    font-size:.65rem;
+    color:var(--accent);
+    letter-spacing:2px;
+    white-space:nowrap;
+    background:rgba(0,212,255,.12);
+    padding:4px 10px;
+    border-radius:12px;
+    border:1px solid rgba(0,212,255,.25);
+    flex-shrink:0;
+  }
+  .img-modal-close {
+    background:transparent;
+    border:1px solid rgba(255,100,100,.4);
+    color:rgba(255,100,100,.8);
+    border-radius:6px;
+    width:30px;
+    height:30px;
+    font-size:.9rem;
+    cursor:pointer;
+    transition:all .2s;
+    flex-shrink:0;
+  }
+  .img-modal-close:hover { background:rgba(255,50,50,.2); color:#fff; border-color:rgba(255,50,50,.7); }
+
+  /* Tělo modalu */
+  .img-modal-body {
+    display:flex;
+    align-items:center;
+    gap:0;
+    flex:1;
+    overflow:hidden;
+    min-height:0;
+    position:relative;
+  }
+
+  .img-modal-nav {
+    background:rgba(0,212,255,.07);
+    border:none;
+    color:var(--accent);
+    font-size:2.8rem;
+    cursor:pointer;
+    padding:0 18px;
+    height:100%;
+    transition:background .2s, color .2s;
+    flex-shrink:0;
+    line-height:1;
+    font-weight:300;
+  }
+  .img-modal-nav:hover { background:rgba(0,212,255,.18); color:#fff; }
+  .img-modal-nav[style*="hidden"] { cursor:default; }
+
+  .img-modal-img-wrap {
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    min-height:300px;
+    max-height:calc(90vh - 130px);
+    background:#010a15;
+    padding:10px;
+  }
+  .img-modal-img {
+    max-width:100%;
+    max-height:100%;
+    object-fit:contain;
+    border-radius:4px;
+    animation:imgLoad .2s ease;
+  }
+  @keyframes imgLoad { from{opacity:0;transform:scale(.97)} to{opacity:1;transform:scale(1)} }
+
+  .img-modal-err {
+    display:none;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    gap:12px;
+    color:rgba(255,150,100,.8);
+    font-family:'Orbitron',monospace;
+    font-size:.72rem;
+    letter-spacing:1px;
+    text-align:center;
+    padding:30px;
+  }
+
+  /* Footer modalu */
+  .img-modal-footer {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:10px 18px;
+    background:rgba(0,212,255,.05);
+    border-top:1px solid rgba(0,212,255,.15);
+    flex-shrink:0;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .img-modal-sender {
+    font-family:'Orbitron',monospace;
+    font-size:.56rem;
+    color:var(--accent);
+    letter-spacing:1.5px;
+  }
+  .img-modal-dots { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+  .img-dot {
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:rgba(0,212,255,.25);
+    border:1px solid rgba(0,212,255,.4);
+    cursor:pointer;
+    transition:all .2s;
+    flex-shrink:0;
+  }
+  .img-dot:hover { background:rgba(0,212,255,.6); transform:scale(1.2); }
+  .img-dot.active { background:var(--accent); box-shadow:0 0 6px rgba(0,212,255,.7); transform:scale(1.15); }
+
+  @media(max-width:600px) {
+    .img-thumb-wrap { width:160px; }
+    .img-thumb-inner { width:160px; height:220px; }
+    .img-modal-box { max-width:98vw; }
+    .img-modal-nav { padding:0 10px; font-size:2rem; }
+  }
+
   ::-webkit-scrollbar{width:7px;}
   ::-webkit-scrollbar-track{background:var(--bg);}
   ::-webkit-scrollbar-thumb{background:var(--accent2);border-radius:4px;}
